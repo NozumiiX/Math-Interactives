@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adjustable Pythagorean Theorem</title>
+<style>
+  :root{
+    --green:#418524;
+    --light:#f1ffeb;
+    --dark:#18320f;
+    --border:#b9d9ad;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#fff;
+    color:#222;
+  }
+  .wrap{
+    max-width:850px;
+    margin:0 auto;
+    padding:24px;
+  }
+  .card{
+    border:2px solid var(--green);
+    border-radius:16px;
+    overflow:hidden;
+    background:#fff;
+  }
+  .header{
+    background:var(--light);
+    padding:20px 24px;
+    border-bottom:2px solid var(--green);
+  }
+  h1{
+    margin:0 0 6px;
+    color:var(--dark);
+    font-size:clamp(22px,4vw,32px);
+  }
+  .subtitle{margin:0;color:#4d5a48}
+  .main{
+    display:grid;
+    grid-template-columns:1.15fr .85fr;
+    gap:24px;
+    padding:24px;
+  }
+  .diagram-panel{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#fafcf9;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+  }
+  svg{width:100%;height:auto;max-height:430px}
+  .controls{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .control{
+    background:var(--light);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px;
+  }
+  label{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  .value{color:var(--green)}
+  input[type=range]{
+    width:100%;
+    accent-color:var(--green);
+    min-height:44px;
+  }
+  .formula{
+    border:2px solid var(--green);
+    border-radius:12px;
+    padding:18px;
+    text-align:center;
+    background:#fff;
+  }
+  .formula-main{
+    font-size:clamp(20px,4vw,28px);
+    font-weight:700;
+    color:var(--dark);
+    margin-bottom:10px;
+  }
+  .calculation{
+    font-size:18px;
+    line-height:1.65;
+  }
+  .result{
+    margin-top:12px;
+    padding:10px;
+    background:var(--light);
+    border-radius:8px;
+    font-weight:700;
+    color:var(--green);
+  }
+  button{
+    border:2px solid var(--green);
+    background:var(--green);
+    color:white;
+    border-radius:9px;
+    padding:12px 16px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    min-height:44px;
+  }
+  button:hover{filter:brightness(.95)}
+  .tip{
+    padding:0 24px 24px;
+    color:#465044;
+    font-size:15px;
+  }
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:12px;
+    font-size:14px;
+  }
+  .legend span{display:flex;align-items:center;gap:6px}
+  .dot{
+    width:12px;height:12px;border-radius:50%;display:inline-block;
+  }
+  @media(max-width:700px){
+    .main{grid-template-columns:1fr;padding:16px}
+    .tip{padding:0 16px 16px}
+    .wrap{padding:10px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="header">
+      <h1>Adjustable Pythagorean Theorem</h1>
+      <p class="subtitle">Change the side lengths and watch the hypotenuse change.</p>
+    </div>
+
+    <div class="main">
+      <div class="diagram-panel">
+        <svg id="triangle" viewBox="0 0 520 430" role="img"
+             aria-label="Interactive right triangle showing sides a, b, and c">
+          <polygon id="tri" fill="#f1ffeb" stroke="#418524" stroke-width="4"/>
+          <polyline id="rightAngle" fill="none" stroke="#18320f" stroke-width="3"/>
+          <text id="aLabel" font-size="22" font-weight="700" fill="#18320f"></text>
+          <text id="bLabel" font-size="22" font-weight="700" fill="#18320f"></text>
+          <text id="cLabel" font-size="22" font-weight="700" fill="#18320f"></text>
+        </svg>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <label for="a">
+            <span>Side \(a\)</span>
+            <span class="value"><span id="aValue">6</span></span>
+          </label>
+          <input id="a" type="range" min="1" max="15" step="0.5" value="6"
+                 aria-label="Adjust side a">
+        </div>
+
+        <div class="control">
+          <label for="b">
+            <span>Side \(b\)</span>
+            <span class="value"><span id="bValue">8</span></span>
+          </label>
+          <input id="b" type="range" min="1" max="15" step="0.5" value="8"
+                 aria-label="Adjust side b">
+        </div>
+
+        <div class="formula">
+          <div class="formula-main">\(a^2+b^2=c^2\)</div>
+          <div class="calculation" id="calculation"></div>
+          <div class="result">Hypotenuse: \(c=\) <span id="cValue">10</span></div>
+        </div>
+
+        <button id="reset" type="button">Reset to 6–8–10</button>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Remember:</strong> \(c\) is always the side opposite the right angle.
+      It is also always the longest side of a right triangle.
+      <div class="legend">
+        <span><i class="dot" style="background:#418524"></i> Triangle</span>
+        <span>▢ Right angle</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const aSlider=document.getElementById('a');
+  const bSlider=document.getElementById('b');
+  const aValue=document.getElementById('aValue');
+  const bValue=document.getElementById('bValue');
+  const cValue=document.getElementById('cValue');
+  const calculation=document.getElementById('calculation');
+  const tri=document.getElementById('tri');
+  const rightAngle=document.getElementById('rightAngle');
+  const aLabel=document.getElementById('aLabel');
+  const bLabel=document.getElementById('bLabel');
+  const cLabel=document.getElementById('cLabel');
+  const reset=document.getElementById('reset');
+
+  function fmt(n){
+    return Number.isInteger(n) ? String(n) : n.toFixed(1);
+  }
+
+  function update(){
+    const a=parseFloat(aSlider.value);
+    const b=parseFloat(bSlider.value);
+    const c=Math.sqrt(a*a+b*b);
+
+    aValue.textContent=fmt(a);
+    bValue.textContent=fmt(b);
+    cValue.textContent=fmt(c);
+
+    calculation.innerHTML =
+      `${fmt(a)}² + ${fmt(b)}² = c²<br>` +
+      `${fmt(a*a)} + ${fmt(b*b)} = c²<br>` +
+      `c = √${fmt(a*a+b*b)} = <strong>${fmt(c)}</strong>`;
+
+    // Scale triangle to fit the SVG while preserving its proportions.
+    const maxSide=Math.max(a,b,c);
+    const scale=280/maxSide;
+    const x0=95, y0=350;
+    const x1=x0+a*scale, y1=y0;
+    const x2=x0, y2=y0-b*scale;
+
+    tri.setAttribute('points',`${x0},${y0} ${x1},${y1} ${x2},${y2}`);
+
+    const ra=18;
+    rightAngle.setAttribute('points',
+      `${x0+ra},${y0} ${x0+ra},${y0-ra} ${x0},${y0-ra}`);
+
+    aLabel.setAttribute('x',(x0+x1)/2);
+    aLabel.setAttribute('y',y0+34);
+    aLabel.setAttribute('text-anchor','middle');
+    aLabel.textContent=`a = ${fmt(a)}`;
+
+    bLabel.setAttribute('x',x0-18);
+    bLabel.setAttribute('y',(y0+y2)/2);
+    bLabel.setAttribute('text-anchor','end');
+    bLabel.setAttribute('dominant-baseline','middle');
+    bLabel.textContent=`b = ${fmt(b)}`;
+
+    cLabel.setAttribute('x',(x1+x2)/2+18);
+    cLabel.setAttribute('y',(y1+y2)/2-10);
+    cLabel.setAttribute('text-anchor','middle');
+    cLabel.textContent=`c = ${fmt(c)}`;
+  }
+
+  aSlider.addEventListener('input',update);
+  bSlider.addEventListener('input',update);
+  reset.addEventListener('click',()=>{
+    aSlider.value=6;
+    bSlider.value=8;
+    update();
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
