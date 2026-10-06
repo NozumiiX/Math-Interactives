@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triangle Inequality Theorem Practice</title>
+<style>
+:root{--green:#418524;--light:#f1ffeb;--ink:#183018;--muted:#5f6b61;--border:#cfe2c8}
+*{box-sizing:border-box} body{margin:0;background:#f7faf6;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+.app{max-width:900px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:clamp(1.35rem,3vw,2rem)} .sub{margin:4px 0 0;color:var(--muted)}
+.score{background:var(--light);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-weight:bold}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:15px}.card{background:white;border:1px solid var(--border);border-radius:14px;padding:18px}
+.visual{display:flex;align-items:center;justify-content:center;min-height:330px} svg{width:100%;max-width:400px}
+.label{font-size:.88rem;color:var(--green);font-weight:bold;text-transform:uppercase;letter-spacing:.04em}
+.q{font-size:1.16rem;line-height:1.5}.rule{background:#f7faf6;border-left:4px solid var(--green);padding:12px;margin:13px 0;font-family:Georgia,serif;font-size:1.08rem}
+input{width:100%;padding:13px;border:2px solid #b8c9b3;border-radius:9px;font-size:18px}label{font-weight:bold;display:block;margin-bottom:7px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{min-height:44px;border:0;border-radius:9px;padding:11px 15px;font-weight:bold;cursor:pointer}
+.primary{background:var(--green);color:white}.secondary{background:#eaf3e6;border:1px solid var(--border)}
+.feedback,.hint{padding:11px;border-radius:9px;margin-top:12px;line-height:1.45}.feedback{background:#f4f7f3;min-height:44px}
+.hint{display:none;background:#fffdf0;border:1px solid #e6dca8}.good{background:#eaf7ed;color:#247a35}.bad{background:#fff0f0;color:#a52a2a}
+details{margin-top:15px}summary{cursor:pointer;color:var(--green);font-weight:bold}.step{padding:8px 0;border-bottom:1px solid #edf2eb}
+.footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:13px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.visual{min-height:245px}}
+</style>
+</head>
+<body>
+<main class="app" id="tii">
+<div class="top"><div><h1>Triangle Inequality Theorem Practice</h1><p class="sub">Decide whether three side lengths can form a triangle.</p></div>
+<div class="score">Score: <span id="score">0</span> / <span id="attempts">0</span></div></div>
+
+<div class="grid">
+<section class="card visual">
+<div style="width:100%">
+<svg viewBox="0 0 420 330" role="img" aria-label="Triangle with three side lengths">
+<polygon points="65,270 350,270 185,65" fill="#f1ffeb" stroke="#418524" stroke-width="4"/>
+<text id="s1" x="207" y="305" text-anchor="middle" font-size="21" font-weight="700">a</text>
+<text id="s2" x="108" y="170" text-anchor="middle" font-size="21" font-weight="700">b</text>
+<text id="s3" x="278" y="166" text-anchor="middle" font-size="21" font-weight="700">c</text>
+</svg>
+<p style="text-align:center;color:#5f6b61">For a triangle to exist, the sum of any two sides must be greater than the third side.</p>
+</div>
+</section>
+
+<section class="card">
+<div class="label" id="type">Question</div>
+<p class="q" id="question"></p>
+<div class="rule"><strong>Triangle Inequality Theorem</strong><br>
+a + b &gt; c<br>
+a + c &gt; b<br>
+b + c &gt; a</div>
+
+<label for="answer">Your answer</label>
+<select id="answer" style="width:100%;padding:13px;border:2px solid #b8c9b3;border-radius:9px;font-size:17px">
+<option value="">Choose an answer...</option>
+<option value="yes">Yes — they can form a triangle</option>
+<option value="no">No — they cannot form a triangle</option>
+</select>
+
+<div class="actions">
+<button class="primary" id="check" type="button">Check Answer</button>
+<button class="secondary" id="hintBtn" type="button">Show Hint</button>
+<button class="secondary" id="newBtn" type="button">New Question</button>
+</div>
+<div class="hint" id="hint"></div>
+<div class="feedback" id="feedback" aria-live="polite">Choose an answer and check it.</div>
+
+<details><summary>Show worked solution</summary><div id="solution"></div></details>
+</section>
+</div>
+<div class="footer">Remember: all three inequalities must be true.</div>
+</main>
+
+<script>
+(function(){
+const root=document.getElementById("tii"); if(!root||root.dataset.ready)return; root.dataset.ready="1";
+const q=root.querySelector("#question"), type=root.querySelector("#type"), ans=root.querySelector("#answer"),
+check=root.querySelector("#check"), hintBtn=root.querySelector("#hintBtn"), newBtn=root.querySelector("#newBtn"),
+hint=root.querySelector("#hint"), fb=root.querySelector("#feedback"), sol=root.querySelector("#solution"),
+scoreEl=root.querySelector("#score"), attEl=root.querySelector("#attempts"),
+s1=root.querySelector("#s1"),s2=root.querySelector("#s2"),s3=root.querySelector("#s3");
+let score=0,attempts=0,current=null,checked=false;
+
+const valid=[[3,4,5],[4,5,6],[5,6,7],[5,7,9],[6,8,10],[7,8,12],[8,10,13],[9,12,15],[10,12,15],[10,15,18],[12,16,20]];
+const invalid=[[2,3,5],[2,4,7],[3,4,8],[3,5,9],[4,6,11],[5,7,13],[6,8,15],[7,9,17],[8,10,19],[9,12,22]];
+
+function make(){
+ let isValid=Math.random()<.5, arr=(isValid?valid:invalid)[Math.floor(Math.random()*(isValid?valid.length:invalid.length))];
+ let shuffled=arr.slice().sort(()=>Math.random()-.5); current={sides:shuffled,valid:isValid}; checked=false;
+ type.textContent=isValid?"Can a triangle be formed?":"Can a triangle be formed?";
+ q.innerHTML=`Can side lengths <strong>${shuffled[0]}</strong>, <strong>${shuffled[1]}</strong>, and <strong>${shuffled[2]}</strong> form a triangle?`;
+ s1.textContent=shuffled[0];s2.textContent=shuffled[1];s3.textContent=shuffled[2];
+ ans.value=""; hint.style.display="none"; fb.className="feedback"; fb.textContent="Choose an answer and check it.";
+ sol.innerHTML=solutionHTML();
+}
+function solutionHTML(){
+ const [a,b,c]=current.sides.slice().sort((x,y)=>x-y);
+ const checks=[`${a} + ${b} > ${c} → ${a+b} > ${c} ${a+b>c?"✓":"✗"}`,
+ `${a} + ${c} > ${b} → ${a+c} > ${b} ${a+c>b?"✓":"✗"}`,
+ `${b} + ${c} > ${a} → ${b+c} > ${a} ${b+c>a?"✓":"✗"}`];
+ return checks.map(x=>`<div class="step">${x}</div>`).join("")+
+ `<p><strong>Conclusion:</strong> ${current.valid?"All three inequalities are true, so the side lengths can form a triangle.":"At least one inequality is false, so the side lengths cannot form a triangle."}</p>`;
+}
+function checkAnswer(){
+ if(checked)return;
+ if(!ans.value){fb.className="feedback bad";fb.textContent="Please choose an answer.";return}
+ attempts++;attEl.textContent=attempts;checked=true;
+ const correct=(ans.value==="yes")===current.valid;
+ if(correct){score++;scoreEl.textContent=score;fb.className="feedback good";fb.innerHTML="<strong>Correct!</strong> You checked the triangle inequality successfully."}
+ else{fb.className="feedback bad";fb.innerHTML="<strong>Not quite.</strong> Check all three inequalities. Remember that every sum of two sides must be greater than the third."}
+}
+hintBtn.addEventListener("click",()=>{
+ hint.style.display="block";
+ hint.innerHTML="<strong>Hint:</strong> Put the side lengths in order from smallest to largest. Then check whether the sum of the two smaller sides is greater than the largest side. If it is, a triangle can be formed.";
+});
+check.addEventListener("click",checkAnswer);newBtn.addEventListener("click",make);make();
+})();
+</script>
+</body>
+</html>
